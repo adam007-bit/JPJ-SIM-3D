@@ -1,71 +1,111 @@
 import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
 
-// Setup scene
+// Scene Setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeef3f7);
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+// Camera
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 6, 12);
+
+// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.getElementById('simulator').appendChild(renderer.domElement);
 
-// Lighting
-const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+// Light
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(10, 20, 10);
+light.castShadow = true;
 scene.add(light);
+
+scene.add(new THREE.AmbientLight(0x404040)); // Soft light
 
 // Ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(200, 200),
-  new THREE.MeshStandardMaterial({ color: 0x999999 })
+  new THREE.MeshStandardMaterial({ color: 0xcccccc })
 );
 ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
 scene.add(ground);
 
-// === KERETA KOTAK SEMENTARA === //
-const carBody = new THREE.Mesh(
+// === Kereta Profesional Kotak ===
+const carGroup = new THREE.Group();
+
+// Badan kereta
+const body = new THREE.Mesh(
   new THREE.BoxGeometry(2, 1, 4),
-  new THREE.MeshStandardMaterial({ color: 0x0074D9 })
+  new THREE.MeshStandardMaterial({ color: 0x007bff, metalness: 0.3, roughness: 0.6 })
 );
+body.position.y = 0.5;
+body.castShadow = true;
+carGroup.add(body);
 
-const frontWheel = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.4, 0.4, 0.4, 32),
-  new THREE.MeshStandardMaterial({ color: 0x111111 })
+// Bumbung
+const roof = new THREE.Mesh(
+  new THREE.BoxGeometry(1.5, 0.4, 2),
+  new THREE.MeshStandardMaterial({ color: 0x0056b3 })
 );
-frontWheel.rotation.z = Math.PI / 2;
-frontWheel.position.set(-0.9, -0.5, 1.5);
+roof.position.set(0, 1.1, 0);
+roof.castShadow = true;
+carGroup.add(roof);
 
-const backWheel = frontWheel.clone();
-backWheel.position.z = -1.5;
+// Lampu depan
+const lightL = new THREE.Mesh(
+  new THREE.SphereGeometry(0.1, 16, 16),
+  new THREE.MeshStandardMaterial({ emissive: 0xffff00, color: 0x222222 })
+);
+lightL.position.set(-0.6, 0.6, 2);
+carGroup.add(lightL);
 
-const carModel = new THREE.Group();
-carModel.add(carBody);
-carModel.add(frontWheel);
-carModel.add(backWheel);
+const lightR = lightL.clone();
+lightR.position.x = 0.6;
+carGroup.add(lightR);
 
-carModel.position.set(0, 0.5, 0);
-scene.add(carModel);
+// Tayar (4 biji)
+const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.2, 32);
+const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x111111 });
 
-// Kamera
-camera.position.set(0, 5, 10);
-camera.lookAt(0, 0, 0);
+const wheelPositions = [
+  [-0.9, 0.2, -1.5], [0.9, 0.2, -1.5], // belakang
+  [-0.9, 0.2, 1.5], [0.9, 0.2, 1.5],   // depan
+];
 
-// Animasi
+for (let pos of wheelPositions) {
+  const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+  wheel.rotation.z = Math.PI / 2;
+  wheel.position.set(...pos);
+  wheel.castShadow = true;
+  carGroup.add(wheel);
+}
+
+carGroup.position.set(0, 0, 0);
+scene.add(carGroup);
+
+// Animasi & Kawalan
 let carSpeed = 0;
 let carDirection = 0;
 
 function animate() {
   requestAnimationFrame(animate);
 
-  carModel.rotation.y += carDirection;
+  carGroup.rotation.y += carDirection;
+  const angle = carGroup.rotation.y;
+  carGroup.position.x -= Math.sin(angle) * carSpeed;
+  carGroup.position.z -= Math.cos(angle) * carSpeed;
 
-  const angle = carModel.rotation.y;
-  carModel.position.x -= Math.sin(angle) * carSpeed;
-  carModel.position.z -= Math.cos(angle) * carSpeed;
+  // Kamera follow kereta
+  camera.position.lerp(
+    new THREE.Vector3(
+      carGroup.position.x + 6 * Math.sin(-angle),
+      5,
+      carGroup.position.z + 6 * Math.cos(-angle)
+    ),
+    0.05
+  );
+  camera.lookAt(carGroup.position);
 
   renderer.render(scene, camera);
 }
@@ -87,4 +127,3 @@ window.turnLeft = () => {
 window.turnRight = () => {
   carDirection = -0.03;
 };
-
