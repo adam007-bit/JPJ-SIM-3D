@@ -1,7 +1,7 @@
 import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
 import { GLTFLoader } from 'https://unpkg.com/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
 
-// Setup asas scene
+// Setup scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeef3f7);
 
@@ -10,11 +10,11 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('simulator').appendChild(renderer.domElement);
 
-// Lampu
+// Lighting
 const light = new THREE.HemisphereLight(0xffffff, 0x444444);
 scene.add(light);
 
-// Lantai
+// Ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(200, 200),
   new THREE.MeshStandardMaterial({ color: 0x999999 })
@@ -22,7 +22,7 @@ const ground = new THREE.Mesh(
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Muatkan model kereta
+// Load car model
 let carModel = null;
 const loader = new GLTFLoader();
 loader.load('models/axia.glb', function(gltf) {
@@ -31,45 +31,49 @@ loader.load('models/axia.glb', function(gltf) {
   carModel.position.set(0, 0, 0);
   scene.add(carModel);
 }, undefined, function(error) {
-  console.error("Gagal load model axia.glb:", error);
+  console.error('Gagal load model:', error);
 });
 
-// Kamera pandang kereta
+// Camera position
 camera.position.set(0, 5, 10);
 camera.lookAt(0, 0, 0);
 
-// Animasi
+// Animation
+let carSpeed = 0;
+let carDirection = 0;
+
 function animate() {
   requestAnimationFrame(animate);
+
+  if (carModel) {
+    // Pusing kereta
+    carModel.rotation.y += carDirection;
+
+    // Gerak ke depan ikut arah
+    const angle = carModel.rotation.y;
+    carModel.position.x -= Math.sin(angle) * carSpeed;
+    carModel.position.z -= Math.cos(angle) * carSpeed;
+  }
+
   renderer.render(scene, camera);
 }
 animate();
 
-// ✅ Stereng boleh dipusing
-window.addEventListener("DOMContentLoaded", () => {
-  const wheel = document.getElementById("steeringWheel");
-  let isDragging = false;
-  let startX = 0;
-  let steeringAngle = 0;
+// Kawalan
+window.moveForward = () => {
+  carSpeed = 0.05;
+};
 
-  wheel.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    startX = e.clientX;
-  });
+window.brake = () => {
+  carSpeed = 0;
+};
 
-  window.addEventListener("mouseup", () => {
-    isDragging = false;
-  });
+window.turnLeft = () => {
+  carDirection = 0.03;
+};
 
-  window.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - startX;
-    steeringAngle = Math.max(-45, Math.min(45, dx)); // clamp -45° hingga +45°
-    wheel.style.transform = `rotate(${steeringAngle}deg)`;
+window.turnRight = () => {
+  carDirection = -0.03;
+};
 
-    if (carModel) {
-      carModel.rotation.y = -steeringAngle * Math.PI / 180;
-    }
-  });
-});
 
