@@ -4,59 +4,38 @@
   <meta charset="UTF-8">
   <title>JPJ Sim 3D by IPBSB</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
-
-    #simulator {
-      width: 100vw;
-      height: 100vh;
-    }
-
+    body { margin: 0; overflow: hidden; }
+    #simulator { width: 100vw; height: 100vh; }
     #controls {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
       z-index: 10;
-      display: flex;
-      gap: 30px;
     }
-
     .pedal {
-      width: 80px;
-      height: 100px;
-      background: linear-gradient(to bottom, #333, #111);
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
+      width: 80px; height: 100px;
+      background: #333;
+      color: white; font-weight: bold;
+      font-size: 18px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
       box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       cursor: pointer;
-      user-select: none;
-      transition: transform 0.1s ease;
-    }
-
-    .pedal:active {
-      transform: scale(0.95);
     }
   </style>
+  <script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
 </head>
 <body>
   <div id="simulator"></div>
-
   <div id="controls">
     <div class="pedal" onclick="turnLeft()">⬅️</div>
     <div class="pedal" onclick="moveForward()">MINYAK</div>
     <div class="pedal" onclick="brake()">BREK</div>
     <div class="pedal" onclick="turnRight()">➡️</div>
   </div>
-
-  <script type="module" src="main.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
 
