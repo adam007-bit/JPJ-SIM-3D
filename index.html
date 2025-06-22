@@ -7,13 +7,11 @@
     body {
       margin: 0;
       overflow: hidden;
-      font-family: Arial, sans-serif;
     }
 
     #simulator {
       width: 100vw;
       height: 100vh;
-      background: #eef3f7;
     }
 
     #controls {
@@ -23,37 +21,21 @@
       transform: translateX(-50%);
       z-index: 10;
       display: flex;
-      align-items: flex-end;
-      gap: 40px;
-    }
-
-    .arrow {
-      padding: 20px;
-      font-size: 26px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    .pedal-group {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      gap: 30px;
     }
 
     .pedal {
-      width: 70px;
-      height: 120px;
+      width: 80px;
+      height: 100px;
+      background: linear-gradient(to bottom, #333, #111);
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      border-radius: 14px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       cursor: pointer;
       user-select: none;
       transition: transform 0.1s ease;
@@ -62,30 +44,19 @@
     .pedal:active {
       transform: scale(0.95);
     }
-
-    .gas {
-      background: linear-gradient(to bottom, #28a745, #1c7c35);
-    }
-
-    .brake {
-      background: linear-gradient(to bottom, #dc3545, #a4161a);
-    }
   </style>
 </head>
 <body>
   <div id="simulator"></div>
 
   <div id="controls">
-    <button class="arrow" onclick="turnLeft()">⬅️</button>
-
-    <div class="pedal-group">
-      <div class="pedal gas" onclick="moveForward()">MINYAK</div>
-      <div class="pedal brake" onclick="brake()">BREK</div>
-    </div>
-
-    <button class="arrow" onclick="turnRight()">➡️</button>
+    <div class="pedal" onclick="turnLeft()">⬅️</div>
+    <div class="pedal" onclick="moveForward()">MINYAK</div>
+    <div class="pedal" onclick="brake()">BREK</div>
+    <div class="pedal" onclick="turnRight()">➡️</div>
   </div>
 
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
